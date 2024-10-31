@@ -1,0 +1,9 @@
+{
+  "id": "e9f84a9c-f88f-4c8c-924b-79a1bdca33ea",
+  "alias": "LikeResultLibrary",
+  "componentType": "Library",
+
+  // The "*" signifies that the version should be taken from the package.json
+  "version": "*",
+  "manifestVersion": 2
+}
