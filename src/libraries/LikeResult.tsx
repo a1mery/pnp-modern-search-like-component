@@ -13,33 +13,43 @@ import "@pnp/sp/webs";
 import "@pnp/sp/items"
 import "@pnp/sp/lists"
 import { ILikedByInformation } from '@pnp/sp/comments/types';
+import { Web } from "@pnp/sp/webs";   
+import { _Lists } from '@pnp/sp/lists/types';
 
-export interface IObjectParam {
-    myProperty: string;
-}
+
+// export interface IObjectParam {
+//     myProperty: string;
+// }
 
 export interface ICustomComponentProps {
 
-    /**
-     * A sample string param
-     */
-    myStringParam?: string;
+    //   /**
+    //  * A sample string param
+    //  */
+    //   myStringParam?: string;
 
-    /**
-     * A sample date param
-     */
-    myDateParam?: Date;
-
-    /**
-     * A sample number param
-     */
-    myNumberParam?: number;
-
-    /**
-     * A sample boolean param
-     */
-    myBooleanParam?: boolean;
-
+    //   /**
+    //    * A sample object param
+    //    */
+    //   myObjectParam?: IObjectParam;
+  
+    //   /**
+    //    * A sample date param
+    //    */
+    //   myDateParam?: Date;
+  
+    //   /**
+    //    * A sample number param
+    //    */
+    //   myNumberParam?: number;
+  
+    //   /**
+    //    * A sample boolean param
+    //    */
+    //   myBooleanParam?: boolean;
+    tenanturl?: string;
+    pageurl?: string;
+    
     context: PageContext;
 }
 
@@ -52,28 +62,32 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
 
     public constructor(props: ICustomComponentProps) {
         super(props);
-        this.showPreviewOnClick = this.showPreviewOnClick.bind(this);
+        this.likeOnClick = this.likeOnClick.bind(this);
         this.state = {
             isLikedByUser: false,
             likeCount: 0
         };
-
     }
+    private sp = spfi().using(SPFx({ pageContext: this.props.context }));
+    private web = Web([this.sp.web, "https://01m0b.sharepoint.com/sites/PnP-Demo"]);
+        
+
+
 
     public componentDidMount(): void {
-        this.checkCurrentState();
-
+        this.checkCurrentLikes();
     }
 
-    private showPreviewOnClick() {
+    private likeOnClick() {
 
         this.getDocumentTitle();
     }
-
-    private async checkCurrentState() {
-
-        const sp = spfi().using(SPFx({ pageContext: this.props.context }));
-        const page: IClientsidePage = await sp.web.loadClientsidePage("/sites/Searchsample/SitePages/Sample.aspx");
+    
+    private async checkCurrentLikes() {
+        // const sp = spfi().using(SPFx({ pageContext: this.props.context }));
+        
+        // const page: IClientsidePage = await this.sp.web.loadClientsidePage("/sites/Searchsample/SitePages/Sample.aspx");
+        const page: IClientsidePage = await this.web.loadClientsidePage("/sites/PnP-Demo/SitePages/Page-8.aspx");
         const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
         this.setState({
             isLikedByUser: likedByInfo.isLikedByUser,
@@ -85,8 +99,8 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
     }
 
     private async getDocumentTitle(): Promise<any> {
-        const sp = spfi().using(SPFx({ pageContext: this.props.context }));
-        const page: IClientsidePage = await sp.web.loadClientsidePage("/sites/Searchsample/SitePages/Sample.aspx");
+        // const sp = spfi().using(SPFx({ pageContext: this.props.context }));
+        const page: IClientsidePage = await this.sp.web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
         const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
         if (this.state.isLikedByUser) {
             await page.unlike();
@@ -109,7 +123,7 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
         const LikeSolidIcon = () => <Icon iconName="LikeSolid" />;
 
         return <div>
-            <span onClick={this.showPreviewOnClick}>
+            <span onClick={this.likeOnClick}>
                 {
                 this.state.isLikedByUser &&
                     <LikeSolidIcon></LikeSolidIcon>
