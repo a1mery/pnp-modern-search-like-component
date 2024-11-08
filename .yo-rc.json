@@ -1,0 +1,21 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "18.18.0",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.12.0"
+    },
+    "version": "1.18.2",
+    "libraryName": "pnp-modern-search-like-component",
+    "libraryId": "ee133703-d308-4e26-a8d2-cb6b1f75fa29",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "pnp-modern-search-like-component",
+    "solutionShortDescription": "pnp-modern-search-like-component description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "library"
+  }
+}
