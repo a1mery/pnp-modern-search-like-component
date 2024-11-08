@@ -29,6 +29,7 @@ export interface ICustomComponentProps {
 export interface ICustomComponenState {
     isLikedByUser: boolean;
     likeCount: number;
+    loading: boolean;
 }
 
 export class CustomComponent extends React.Component<ICustomComponentProps, ICustomComponenState> {
@@ -38,7 +39,8 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
         this.likeOnClick = this.likeOnClick.bind(this);
         this.state = {
             isLikedByUser: false,
-            likeCount: 0
+            likeCount: 0,
+            loading: true
         };
     }
     private sp = spfi().using(SPFx({ pageContext: this.props.context }));
@@ -72,7 +74,8 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
         const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
         this.setState({
             isLikedByUser: likedByInfo.isLikedByUser,
-            likeCount: likedByInfo.likeCount
+            likeCount: likedByInfo.likeCount,
+            loading: false
         })
     }
 
@@ -84,8 +87,10 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
         const personString: String = (this.state.likeCount > 2 && this.state.isLikedByUser) || (this.state.likeCount > 1 && !this.state.isLikedByUser) ? "persons" : "person"
 
         return <div>
+             
             <span>
                 {
+                    !this.state.loading &&
                     <IconButton
                         iconProps={this.state.isLikedByUser ? LikeSolidIcon : LikeIcon}
                         title="LikeIcon"
@@ -96,19 +101,19 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                 }
             </span>
             {
-                (this.state.isLikedByUser && this.state.likeCount > 1) &&
+                (!this.state.loading && this.state.isLikedByUser && this.state.likeCount > 1) &&
                 <span>You and {this.state.likeCount - 1} {personString} liked this</span>
             }
             {
-                (this.state.isLikedByUser && this.state.likeCount == 1) &&
+                (!this.state.loading && this.state.isLikedByUser && this.state.likeCount == 1) &&
                 <span>You liked this</span>
             }
             {
-                (!this.state.isLikedByUser && this.state.likeCount > 0) &&
+                (!this.state.loading && !this.state.isLikedByUser && this.state.likeCount > 0) &&
                 <span>{this.state.likeCount} {personString} liked this</span>
             }
             {
-                (!this.state.isLikedByUser && this.state.likeCount == 0) &&
+                (!this.state.loading && !this.state.isLikedByUser && this.state.likeCount == 0) &&
                 <span>Like</span>
             }
         </div>;
