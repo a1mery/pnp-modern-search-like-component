@@ -6,50 +6,23 @@ import { SPHttpClient } from '@microsoft/sp-http';
 import { PageContext } from '@microsoft/sp-page-context';
 import { SPFx, spfi } from "@pnp/sp";
 import { IClientsidePage } from "@pnp/sp/clientside-pages";
-import { Icon } from '@fluentui/react/lib/Icon';
+import { IIconProps } from '@fluentui/react/lib/Icon';
+import { IconButton } from '@fluentui/react/lib/Button';
 import "@pnp/sp/clientside-pages";
 import "@pnp/sp/comments/clientside-page";
 import "@pnp/sp/webs";
 import "@pnp/sp/items"
 import "@pnp/sp/lists"
 import { ILikedByInformation } from '@pnp/sp/comments/types';
-import { Web } from "@pnp/sp/webs";   
+import { Web } from "@pnp/sp/webs";
 import { _Lists } from '@pnp/sp/lists/types';
 
 
-// export interface IObjectParam {
-//     myProperty: string;
-// }
-
 export interface ICustomComponentProps {
 
-    //   /**
-    //  * A sample string param
-    //  */
-    //   myStringParam?: string;
-
-    //   /**
-    //    * A sample object param
-    //    */
-    //   myObjectParam?: IObjectParam;
-  
-    //   /**
-    //    * A sample date param
-    //    */
-    //   myDateParam?: Date;
-  
-    //   /**
-    //    * A sample number param
-    //    */
-    //   myNumberParam?: number;
-  
-    //   /**
-    //    * A sample boolean param
-    //    */
-    //   myBooleanParam?: boolean;
     tenanturl?: string;
     pageurl?: string;
-    
+    pagesourcesite?: string;
     context: PageContext;
 }
 
@@ -69,8 +42,8 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
         };
     }
     private sp = spfi().using(SPFx({ pageContext: this.props.context }));
-    private web = Web([this.sp.web, "https://01m0b.sharepoint.com/sites/PnP-Demo"]);
-        
+
+
 
 
 
@@ -78,29 +51,9 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
         this.checkCurrentLikes();
     }
 
-    private likeOnClick() {
-
-        this.getDocumentTitle();
-    }
-    
-    private async checkCurrentLikes() {
-        // const sp = spfi().using(SPFx({ pageContext: this.props.context }));
-        
-        // const page: IClientsidePage = await this.sp.web.loadClientsidePage("/sites/Searchsample/SitePages/Sample.aspx");
-        const page: IClientsidePage = await this.web.loadClientsidePage("/sites/PnP-Demo/SitePages/Page-8.aspx");
-        const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
-        this.setState({
-            isLikedByUser: likedByInfo.isLikedByUser,
-            likeCount: likedByInfo.likeCount
-        })
-
-
-
-    }
-
-    private async getDocumentTitle(): Promise<any> {
-        // const sp = spfi().using(SPFx({ pageContext: this.props.context }));
-        const page: IClientsidePage = await this.sp.web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
+    private async likeOnClick() {
+        const web = Web([this.sp.web, this.props.pagesourcesite]);
+        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
         const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
         if (this.state.isLikedByUser) {
             await page.unlike();
@@ -115,28 +68,53 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                 likeCount: likedByInfo.likeCount
             })
         }
-        return "ATH";
+    }
+
+    private async checkCurrentLikes() {
+
+        const web = Web([this.sp.web, this.props.pagesourcesite]);
+        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
+        const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
+        this.setState({
+            isLikedByUser: likedByInfo.isLikedByUser,
+            likeCount: likedByInfo.likeCount
+        })
     }
 
     public render() {
-        const LikeIcon = () => <Icon iconName="Like" />;
-        const LikeSolidIcon = () => <Icon iconName="LikeSolid" />;
+
+
+        const LikeSolidIcon: IIconProps = { iconName: 'LikeSolid' };
+        const LikeIcon: IIconProps = { iconName: 'Like' };
 
         return <div>
             <span onClick={this.likeOnClick}>
                 {
-                this.state.isLikedByUser &&
-                    <LikeSolidIcon></LikeSolidIcon>
+                    <IconButton
+                        iconProps={this.state.isLikedByUser ? LikeSolidIcon : LikeIcon}
+                        title="LikeIcon"
+                        ariaLabel="LikeIcon"
+                        disabled={false}
+                        checked={false}
+                        onClick={this.likeOnClick} />               
                 }
-                {
-                !this.state.isLikedByUser &&
-
-                    <LikeIcon></LikeIcon>
-                
-                }
-
-                <span>{this.state.likeCount} like this</span>
             </span>
+            {
+                this.state.isLikedByUser && this.state.likeCount > 1 &&
+                <span>You and {this.state.likeCount} persons liked this</span>
+            }
+            {
+                this.state.isLikedByUser && this.state.likeCount === 1 &&
+                <span>You liked this</span>
+            }
+            {
+                !this.state.isLikedByUser && this.state.likeCount > 0 &&
+                <span>{this.state.likeCount} persons liked this</span>
+            }
+            {
+                !this.state.isLikedByUser && this.state.likeCount === 0 &&
+                <span>Like</span>
+            }
         </div>;
 
     }
