@@ -43,29 +43,24 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
     }
     private sp = spfi().using(SPFx({ pageContext: this.props.context }));
 
-
-
-
-
     public componentDidMount(): void {
         this.checkCurrentLikes();
     }
 
-    private async likeOnClick() {
+    private async likeOnClick(currentLikeCount: number) {
         const web = Web([this.sp.web, this.props.pagesourcesite]);
         const page: IClientsidePage = await web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
-        const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
         if (this.state.isLikedByUser) {
             await page.unlike();
             this.setState({
                 isLikedByUser: false,
-                likeCount: likedByInfo.likeCount
+                likeCount: currentLikeCount -1
             })
         } else {
             await page.like();
             this.setState({
                 isLikedByUser: true,
-                likeCount: likedByInfo.likeCount
+                likeCount: currentLikeCount + 1
             })
         }
     }
@@ -86,9 +81,10 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
 
         const LikeSolidIcon: IIconProps = { iconName: 'LikeSolid' };
         const LikeIcon: IIconProps = { iconName: 'Like' };
+        const personString: String = (this.state.likeCount > 2 && this.state.isLikedByUser) || (this.state.likeCount > 1 && !this.state.isLikedByUser) ? "persons" : "person"
 
         return <div>
-            <span onClick={this.likeOnClick}>
+            <span>
                 {
                     <IconButton
                         iconProps={this.state.isLikedByUser ? LikeSolidIcon : LikeIcon}
@@ -96,23 +92,23 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                         ariaLabel="LikeIcon"
                         disabled={false}
                         checked={false}
-                        onClick={this.likeOnClick} />               
+                        onClick={() =>this.likeOnClick (this.state.likeCount)} />               
                 }
             </span>
             {
-                this.state.isLikedByUser && this.state.likeCount > 1 &&
-                <span>You and {this.state.likeCount} persons liked this</span>
+                (this.state.isLikedByUser && this.state.likeCount > 1) &&
+                <span>You and {this.state.likeCount - 1} {personString} liked this</span>
             }
             {
-                this.state.isLikedByUser && this.state.likeCount === 1 &&
+                (this.state.isLikedByUser && this.state.likeCount == 1) &&
                 <span>You liked this</span>
             }
             {
-                !this.state.isLikedByUser && this.state.likeCount > 0 &&
-                <span>{this.state.likeCount} persons liked this</span>
+                (!this.state.isLikedByUser && this.state.likeCount > 0) &&
+                <span>{this.state.likeCount} {personString} liked this</span>
             }
             {
-                !this.state.isLikedByUser && this.state.likeCount === 0 &&
+                (!this.state.isLikedByUser && this.state.likeCount == 0) &&
                 <span>Like</span>
             }
         </div>;
