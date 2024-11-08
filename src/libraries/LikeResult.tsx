@@ -49,21 +49,21 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
         this.checkCurrentLikes();
     }
 
-    private async likeOnClick(currentLikeCount: number) {
+    private async likeOnClick(newCount: number) {
         const web = Web([this.sp.web, this.props.pagesourcesite]);
         const page: IClientsidePage = await web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
         if (this.state.isLikedByUser) {
             await page.unlike();
             this.setState({
                 isLikedByUser: false,
-                likeCount: currentLikeCount -1
-            })
+                likeCount: newCount
+            });
         } else {
             await page.like();
             this.setState({
                 isLikedByUser: true,
-                likeCount: currentLikeCount + 1
-            })
+                likeCount: newCount
+            });
         }
     }
 
@@ -81,13 +81,13 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
 
     public render() {
 
-
         const LikeSolidIcon: IIconProps = { iconName: 'LikeSolid' };
         const LikeIcon: IIconProps = { iconName: 'Like' };
-        const personString: String = (this.state.likeCount > 2 && this.state.isLikedByUser) || (this.state.likeCount > 1 && !this.state.isLikedByUser) ? "people" : "person"
-
+        const personString: String = (this.state.likeCount > 2 && this.state.isLikedByUser) || (this.state.likeCount > 1 && !this.state.isLikedByUser) ? "people" : "person";
+        let currentCount = this.state.likeCount;
+        
         return <div>
-             
+
             <span>
                 {
                     !this.state.loading &&
@@ -97,7 +97,7 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                         ariaLabel="LikeIcon"
                         disabled={false}
                         checked={false}
-                        onClick={(e) => {e.preventDefault();this.likeOnClick (likeCount)}} />             
+                        onClick={() => this.likeOnClick (this.state.isLikedByUser ? currentCount -1 : +currentCount +1)} />
                 }
             </span>
             {
