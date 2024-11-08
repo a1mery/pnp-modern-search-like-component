@@ -97,7 +97,7 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                         ariaLabel="LikeIcon"
                         disabled={false}
                         checked={false}
-                        onClick={() =>this.likeOnClick (this.state.likeCount)} />               
+                        onClick={(e) => {e.preventDefault();this.likeOnClick (likeCount)}} />             
                 }
             </span>
             {
