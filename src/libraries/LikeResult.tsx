@@ -84,7 +84,7 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
 
         const LikeSolidIcon: IIconProps = { iconName: 'LikeSolid' };
         const LikeIcon: IIconProps = { iconName: 'Like' };
-        const personString: String = (this.state.likeCount > 2 && this.state.isLikedByUser) || (this.state.likeCount > 1 && !this.state.isLikedByUser) ? "persons" : "person"
+        const personString: String = (this.state.likeCount > 2 && this.state.isLikedByUser) || (this.state.likeCount > 1 && !this.state.isLikedByUser) ? "people" : "person"
 
         return <div>
              
