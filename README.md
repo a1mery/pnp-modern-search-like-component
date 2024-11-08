@@ -5,7 +5,10 @@
 Custom web component for the PnP Modern Search (v4) solution.
 This component adds a like button on search results displayed by the Search Results Web Part.
 
-[picture of the solution in action, if possible]
+![DemoImage](/assets/Like-results.png)
+
+![DemoGif](/assets/Like-results.gif)
+
 
 ## Used SharePoint Framework Version
 
