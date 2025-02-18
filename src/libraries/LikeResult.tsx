@@ -15,7 +15,6 @@ import "@pnp/sp/items"
 import "@pnp/sp/lists"
 import { ILikedByInformation } from '@pnp/sp/comments/types';
 import { Web } from "@pnp/sp/webs";
-import { _Lists } from '@pnp/sp/lists/types';
 
 
 export interface ICustomComponentProps {
@@ -45,29 +44,28 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
     }
     private sp = spfi().using(SPFx({ pageContext: this.props.context }));
 
-    public componentDidMount(): void {
-        this.checkCurrentLikes();
+    public async componentDidMount(): Promise<void> {
+        await this.checkCurrentLikes();
     }
 
-    private async likeOnClick(newCount: number) {
-        const web = Web([this.sp.web, this.props.pagesourcesite]);
-        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
-        if (this.state.isLikedByUser) {
-            await page.unlike();
+    private async likeOnClick(newCount: number, unlike: boolean): Promise<void> {
+        if (unlike) {
             this.setState({
                 isLikedByUser: false,
                 likeCount: newCount
             });
         } else {
-            await page.like();
             this.setState({
                 isLikedByUser: true,
                 likeCount: newCount
             });
         }
+        const web = Web([this.sp.web, this.props.pagesourcesite]);
+        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
+        const likeAction: void = unlike ? await page.unlike() : await page.like();
     }
 
-    private async checkCurrentLikes() {
+    private async checkCurrentLikes(): Promise<void> {
 
         const web = Web([this.sp.web, this.props.pagesourcesite]);
         const page: IClientsidePage = await web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
@@ -80,11 +78,10 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
     }
 
     public render() {
-
         const LikeSolidIcon: IIconProps = { iconName: 'LikeSolid' };
         const LikeIcon: IIconProps = { iconName: 'Like' };
         const personString: String = (this.state.likeCount > 2 && this.state.isLikedByUser) || (this.state.likeCount > 1 && !this.state.isLikedByUser) ? "people" : "person";
-        let currentCount = this.state.likeCount;
+        const currentCount = this.state.likeCount;
         
         return <div>
 
@@ -97,7 +94,7 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                         ariaLabel="LikeIcon"
                         disabled={false}
                         checked={false}
-                        onClick={() => this.likeOnClick (this.state.isLikedByUser ? currentCount -1 : +currentCount +1)} />
+                        onClick={() => this.likeOnClick (this.state.isLikedByUser ? currentCount -1 : +currentCount +1, this.state.isLikedByUser ? true : false)} />
                 }
             </span>
             {
@@ -105,7 +102,7 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                 <span>You and {this.state.likeCount - 1} {personString} liked this</span>
             }
             {
-                (!this.state.loading && this.state.isLikedByUser && this.state.likeCount == 1) &&
+                (!this.state.loading && this.state.isLikedByUser && this.state.likeCount === 1) &&
                 <span>You liked this</span>
             }
             {
@@ -113,11 +110,10 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                 <span>{this.state.likeCount} {personString} liked this</span>
             }
             {
-                (!this.state.loading && !this.state.isLikedByUser && this.state.likeCount == 0) &&
+                (!this.state.loading && !this.state.isLikedByUser && this.state.likeCount === 0) &&
                 <span>Like</span>
             }
         </div>;
-
     }
 }
 
@@ -139,7 +135,6 @@ export class MyCustomComponentWebComponent extends BaseWebComponent {
         let _pageContext: PageContext;
         serviceScope.whenFinished(() => {
             this._spHttpClient = serviceScope.consume(SPHttpClient.serviceKey);
-
             this._pageContext = serviceScope.consume(PageContext.serviceKey);
             this._currentWebUrl = this._pageContext.web.absoluteUrl;
         });
