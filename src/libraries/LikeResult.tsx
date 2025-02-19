@@ -18,10 +18,9 @@ import { Web } from "@pnp/sp/webs";
 
 
 export interface ICustomComponentProps {
-
-    tenanturl?: string;
-    pageurl?: string;
-    pagesourcesite?: string;
+    tenantUrl?: string;
+    pageUrl?: string;
+    pageSourceSite?: string;
     context: PageContext;
 }
 
@@ -48,6 +47,17 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
         await this.checkCurrentLikes();
     }
 
+    private async checkCurrentLikes(): Promise<void> {
+        const web = Web([this.sp.web, this.props.pageSourceSite]);
+        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageUrl.split(this.props.tenantUrl)[1]);
+        const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
+        this.setState({
+            isLikedByUser: likedByInfo.isLikedByUser,
+            likeCount: likedByInfo.likeCount,
+            loading: false
+        })
+    }
+
     private async likeOnClick(newCount: number, unlike: boolean): Promise<void> {
         if (unlike) {
             this.setState({
@@ -60,21 +70,9 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                 likeCount: newCount
             });
         }
-        const web = Web([this.sp.web, this.props.pagesourcesite]);
-        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
+        const web = Web([this.sp.web, this.props.pageSourceSite]);
+        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageUrl.split(this.props.tenantUrl)[1]);
         const likeAction: void = unlike ? await page.unlike() : await page.like();
-    }
-
-    private async checkCurrentLikes(): Promise<void> {
-
-        const web = Web([this.sp.web, this.props.pagesourcesite]);
-        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageurl.split(this.props.tenanturl)[1]);
-        const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
-        this.setState({
-            isLikedByUser: likedByInfo.isLikedByUser,
-            likeCount: likedByInfo.likeCount,
-            loading: false
-        })
     }
 
     public render() {
@@ -102,7 +100,7 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                 <span>You and {this.state.likeCount - 1} {personString} liked this</span>
             }
             {
-                (!this.state.loading && this.state.isLikedByUser && this.state.likeCount === 1) &&
+                (!this.state.loading && this.state.isLikedByUser && this.state.likeCount == 1) &&
                 <span>You liked this</span>
             }
             {
@@ -110,14 +108,14 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                 <span>{this.state.likeCount} {personString} liked this</span>
             }
             {
-                (!this.state.loading && !this.state.isLikedByUser && this.state.likeCount === 0) &&
+                (!this.state.loading && !this.state.isLikedByUser && this.state.likeCount == 0) &&
                 <span>Like</span>
             }
         </div>;
     }
 }
 
-export class MyCustomComponentWebComponent extends BaseWebComponent {
+export class LikeResultWebComponent extends BaseWebComponent {
     private _spHttpClient: SPHttpClient;
     private _pageContext: PageContext;
     private _currentWebUrl: string;
