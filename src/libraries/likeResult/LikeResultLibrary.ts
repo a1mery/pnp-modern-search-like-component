@@ -1,4 +1,12 @@
-import { IAdaptiveCardAction, IComponentDefinition, IDataSourceDefinition, IExtensibilityLibrary, ILayoutDefinition, IQueryModifierDefinition, ISuggestionProviderDefinition } from "@pnp/modern-search-extensibility";
+import {
+  IAdaptiveCardAction,
+  IComponentDefinition,
+  IDataSourceDefinition,
+  IExtensibilityLibrary,
+  ILayoutDefinition,
+  IQueryModifierDefinition,
+  ISuggestionProviderDefinition
+} from "@pnp/modern-search-extensibility";
 import { LikeResultWebComponent } from "../LikeResult";
 import { ServiceKey, ServiceScope } from "@microsoft/sp-core-library";
 import { SPHttpClient } from "@microsoft/sp-http";

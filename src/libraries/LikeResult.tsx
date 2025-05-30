@@ -16,114 +16,11 @@ import "@pnp/sp/lists"
 import { ILikedByInformation } from '@pnp/sp/comments/types';
 import { Web } from "@pnp/sp/webs";
 
-
-export interface ICustomComponentProps {
-    tenantUrl?: string;
-    pageUrl?: string;
-    pageSourceSite?: string;
-    context: PageContext;
-}
-
-export interface ICustomComponenState {
-    isLikedByUser: boolean;
-    likeCount: number;
-    loading: boolean;
-}
-
-export class CustomComponent extends React.Component<ICustomComponentProps, ICustomComponenState> {
-
-    public constructor(props: ICustomComponentProps) {
-        super(props);
-        this.likeOnClick = this.likeOnClick.bind(this);
-        this.state = {
-            isLikedByUser: false,
-            likeCount: 0,
-            loading: true
-        };
-    }
-    private sp = spfi().using(SPFx({ pageContext: this.props.context }));
-
-    public async componentDidMount(): Promise<void> {
-        await this.checkCurrentLikes();
-    }
-
-    private async checkCurrentLikes(): Promise<void> {
-        const web = Web([this.sp.web, this.props.pageSourceSite]);
-        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageUrl.split(this.props.tenantUrl)[1]);
-        const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
-        this.setState({
-            isLikedByUser: likedByInfo.isLikedByUser,
-            likeCount: likedByInfo.likeCount,
-            loading: false
-        })
-    }
-
-    private async likeOnClick(newCount: number, unlike: boolean): Promise<void> {
-        if (unlike) {
-            this.setState({
-                isLikedByUser: false,
-                likeCount: newCount
-            });
-        } else {
-            this.setState({
-                isLikedByUser: true,
-                likeCount: newCount
-            });
-        }
-        const web = Web([this.sp.web, this.props.pageSourceSite]);
-        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageUrl.split(this.props.tenantUrl)[1]);
-        const likeAction: void = unlike ? await page.unlike() : await page.like();
-    }
-
-    public render() {
-        const LikeSolidIcon: IIconProps = { iconName: 'LikeSolid' };
-        const LikeIcon: IIconProps = { iconName: 'Like' };
-        const personString: String = (this.state.likeCount > 2 && this.state.isLikedByUser) || (this.state.likeCount > 1 && !this.state.isLikedByUser) ? "people" : "person";
-        const currentCount = this.state.likeCount;
-        
-        return <div>
-
-            <span>
-                {
-                    !this.state.loading &&
-                    <IconButton
-                        iconProps={this.state.isLikedByUser ? LikeSolidIcon : LikeIcon}
-                        title="LikeIcon"
-                        ariaLabel="LikeIcon"
-                        disabled={false}
-                        checked={false}
-                        onClick={() => this.likeOnClick (this.state.isLikedByUser ? currentCount -1 : +currentCount +1, this.state.isLikedByUser ? true : false)} />
-                }
-            </span>
-            {
-                (!this.state.loading && this.state.isLikedByUser && this.state.likeCount > 1) &&
-                <span>You and {this.state.likeCount - 1} {personString} liked this</span>
-            }
-            {
-                (!this.state.loading && this.state.isLikedByUser && this.state.likeCount == 1) &&
-                <span>You liked this</span>
-            }
-            {
-                (!this.state.loading && !this.state.isLikedByUser && this.state.likeCount > 0) &&
-                <span>{this.state.likeCount} {personString} liked this</span>
-            }
-            {
-                (!this.state.loading && !this.state.isLikedByUser && this.state.likeCount == 0) &&
-                <span>Like</span>
-            }
-        </div>;
-    }
-}
-
 export class LikeResultWebComponent extends BaseWebComponent {
     private _spHttpClient: SPHttpClient;
     private _pageContext: PageContext;
     private _currentWebUrl: string;
 
-    public constructor(props: ICustomComponentProps) {
-        super();
-
-    }
 
     public async connectedCallback() {
 
@@ -143,5 +40,104 @@ export class LikeResultWebComponent extends BaseWebComponent {
 
     protected onDispose(): void {
         ReactDOM.unmountComponentAtNode(this);
+    }
+}
+
+export interface ICustomComponentProps {
+    tenantUrl?: string;
+    pageUrl?: string;
+    pageSourceSite?: string;
+    context: PageContext;
+}
+
+export interface ICustomComponenState {
+    isLikedByUser: boolean;
+    likeCount: number;
+    loading: boolean;
+}
+
+export class CustomComponent extends React.Component<ICustomComponentProps, ICustomComponenState> {
+
+    private sp: ReturnType<typeof spfi>;
+    public constructor(props: ICustomComponentProps) {
+        super(props);
+        this.likeOnClick = this.likeOnClick.bind(this);
+        this.state = {
+            isLikedByUser: false,
+            likeCount: 0,
+            loading: true
+        };
+        this.sp = spfi().using(SPFx({ pageContext: this.props.context }));
+    }
+
+
+    public async componentDidMount(): Promise<void> {
+        await this.checkCurrentLikes();
+    }
+
+    private async checkCurrentLikes(): Promise<void> {
+        const web = Web([this.sp.web, this.props.pageSourceSite]);
+        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageUrl.split(this.props.tenantUrl)[1]);
+        const likedByInfo: ILikedByInformation = await page.getLikedByInformation();
+        this.setState({
+            isLikedByUser: likedByInfo.isLikedByUser,
+            likeCount: likedByInfo.likeCount,
+            loading: false
+        })
+    }
+
+    private async likeOnClick(newCount: number, unlike: boolean): Promise<void> {
+        this.setState({
+            isLikedByUser: !unlike,
+            likeCount: newCount
+        });
+        const web = Web([this.sp.web, this.props.pageSourceSite]);
+        const page: IClientsidePage = await web.loadClientsidePage(this.props.pageUrl.split(this.props.tenantUrl)[1]);
+        if (unlike) {
+                await page.unlike();
+            } else {
+                await page.like();
+            }
+    }
+
+    public render(): React.ReactNode {
+        const LikeSolidIcon: IIconProps = { iconName: 'LikeSolid' };
+        const LikeIcon: IIconProps = { iconName: 'Like' };
+        const personString: string = (this.state.likeCount > 2 && this.state.isLikedByUser) || (this.state.likeCount > 1 && !this.state.isLikedByUser) ? "people" : "person";
+        const currentCount = this.state.likeCount;
+        
+        return (
+            <div>
+                <span>
+                    {!this.state.loading && (
+                        <IconButton
+                            iconProps={this.state.isLikedByUser ? LikeSolidIcon : LikeIcon}
+                            title="LikeIcon"
+                            ariaLabel="LikeIcon"
+                            disabled={false}
+                            checked={false}
+                            onClick={() =>
+                                this.likeOnClick(
+                                    this.state.isLikedByUser ? currentCount - 1 : + currentCount + 1,
+                                    this.state.isLikedByUser
+                                )
+                            }
+                        />
+                    )}
+                </span>
+                {!this.state.loading && this.state.isLikedByUser && this.state.likeCount > 1 && (
+                    <span>You and {this.state.likeCount - 1} {personString} liked this</span>
+                )}
+                {!this.state.loading && this.state.isLikedByUser && + this.state.likeCount === 1 && (
+                    <span>You liked this</span>
+                )}
+                {!this.state.loading && !this.state.isLikedByUser && this.state.likeCount > 0 && (
+                    <span>{this.state.likeCount} {personString} liked this</span>
+                )}
+                {!this.state.loading && !this.state.isLikedByUser && + this.state.likeCount === 0 && (
+                    <span>Like</span>
+                )}
+            </div>
+        );
     }
 }
