@@ -1,5 +1,13 @@
-import { IAdaptiveCardAction, IComponentDefinition, IDataSourceDefinition, IExtensibilityLibrary, ILayoutDefinition, IQueryModifierDefinition, ISuggestionProviderDefinition } from "@pnp/modern-search-extensibility";
-import { MyCustomComponentWebComponent } from "../LikeResult";
+import {
+  IAdaptiveCardAction,
+  IComponentDefinition,
+  IDataSourceDefinition,
+  IExtensibilityLibrary,
+  ILayoutDefinition,
+  IQueryModifierDefinition,
+  ISuggestionProviderDefinition
+} from "@pnp/modern-search-extensibility";
+import { LikeResultWebComponent } from "../LikeResult";
 import { ServiceKey, ServiceScope } from "@microsoft/sp-core-library";
 import { SPHttpClient } from "@microsoft/sp-http";
 import { PageContext } from "@microsoft/sp-page-context";
@@ -29,7 +37,7 @@ constructor(serviceScope: ServiceScope) {
     return [
       {
         componentName: 'like-result-component',
-        componentClass: MyCustomComponentWebComponent
+        componentClass: LikeResultWebComponent
       }
     ];
   }
