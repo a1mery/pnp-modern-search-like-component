@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { BaseWebComponent } from '@pnp/modern-search-extensibility';
 import * as ReactDOM from 'react-dom';
-import { ServiceScope } from '@microsoft/sp-core-library';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { PageContext } from '@microsoft/sp-page-context';
 import { SPFx, spfi } from "@pnp/sp";
@@ -15,33 +14,6 @@ import "@pnp/sp/items"
 import "@pnp/sp/lists"
 import { ILikedByInformation } from '@pnp/sp/comments/types';
 import { Web } from "@pnp/sp/webs";
-
-export class LikeResultWebComponent extends BaseWebComponent {
-    private _spHttpClient: SPHttpClient;
-    private _pageContext: PageContext;
-    private _currentWebUrl: string;
-
-
-    public async connectedCallback() {
-
-        let props = this.resolveAttributes();
-        let serviceScope: ServiceScope = this._serviceScope;
-        let _spHttpClient: SPHttpClient;
-        let _pageContext: PageContext;
-        serviceScope.whenFinished(() => {
-            this._spHttpClient = serviceScope.consume(SPHttpClient.serviceKey);
-            this._pageContext = serviceScope.consume(PageContext.serviceKey);
-            this._currentWebUrl = this._pageContext.web.absoluteUrl;
-        });
-        const customComponent = <CustomComponent context={this._pageContext} {...props} />;
-        ReactDOM.render(customComponent, this);
-    }
-
-
-    protected onDispose(): void {
-        ReactDOM.unmountComponentAtNode(this);
-    }
-}
 
 export interface ICustomComponentProps {
     tenantUrl?: string;
@@ -139,5 +111,27 @@ export class CustomComponent extends React.Component<ICustomComponentProps, ICus
                 )}
             </div>
         );
+    }
+}
+
+export class LikeResultWebComponent extends BaseWebComponent {
+    private _spHttpClient: SPHttpClient;
+    private _pageContext: PageContext;
+    private _currentWebUrl: string;
+
+    public async connectedCallback(): Promise<void> {
+        const props = this.resolveAttributes();
+        const serviceScope = this._serviceScope;
+        serviceScope.whenFinished(() => {
+            this._spHttpClient = serviceScope.consume(SPHttpClient.serviceKey);
+            this._pageContext = serviceScope.consume(PageContext.serviceKey);
+            this._currentWebUrl = this._pageContext.web.absoluteUrl;
+        });
+        const customComponent = <CustomComponent context={this._pageContext} {...props} />;
+        ReactDOM.render(customComponent, this);
+    }
+
+    protected onDispose(): void {
+        ReactDOM.unmountComponentAtNode(this);
     }
 }

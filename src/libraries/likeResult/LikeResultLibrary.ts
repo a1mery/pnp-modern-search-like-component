@@ -5,7 +5,8 @@ import {
   IExtensibilityLibrary,
   ILayoutDefinition,
   IQueryModifierDefinition,
-  ISuggestionProviderDefinition
+  ISuggestionProviderDefinition,
+  BaseWebComponent
 } from "@pnp/modern-search-extensibility";
 import { LikeResultWebComponent } from "../LikeResult";
 import { ServiceKey, ServiceScope } from "@microsoft/sp-core-library";
@@ -33,7 +34,7 @@ constructor(serviceScope: ServiceScope) {
   getCustomLayouts(): ILayoutDefinition[] {
     return [];
   }
-  public getCustomWebComponents(): IComponentDefinition<any>[] {
+  public getCustomWebComponents(): IComponentDefinition<typeof BaseWebComponent>[] {
     return [
       {
         componentName: 'like-result-component',
@@ -44,16 +45,16 @@ constructor(serviceScope: ServiceScope) {
   getCustomSuggestionProviders(): ISuggestionProviderDefinition[] {
     return [];
   }
-  registerHandlebarsCustomizations?(handlebarsNamespace: typeof Handlebars): void {
-
+  registerHandlebarsCustomizations(handlebarsNamespace: typeof Handlebars): void {
+    // Method intentionally left empty - no Handlebars customizations needed
   }
   invokeCardAction(action: IAdaptiveCardAction): void {
-
+    // Method intentionally left empty - no card actions to handle
   }
-  getCustomQueryModifiers?(): IQueryModifierDefinition[] {
+  getCustomQueryModifiers(): IQueryModifierDefinition[] {
     return [];
   }
-  getCustomDataSources?(): IDataSourceDefinition[] {
+  getCustomDataSources(): IDataSourceDefinition[] {
     return [];
   }
 
