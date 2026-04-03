@@ -1,6 +1,6 @@
 {
   "name": "pnp-modern-search-like-component",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": false,
   "engines": {
     "node": ">=22.14.0 < 23.0.0"
